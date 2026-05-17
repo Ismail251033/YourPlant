@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2d6a4f" />
+  <meta name="description" content="Plant Care Assistant — Upload your plant photo and get smart AI care suggestions instantly." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PlantCare" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <title>Plant Care Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="light-mode">
+
+  <!-- Install Button -->
+  <button id="installBtn" class="install-btn hidden" aria-label="Install App">
+    <span class="install-icon">⬇</span>
+    <span class="install-text">Install App</span>
+  </button>
+
+  <!-- Dark Mode Toggle -->
+  <button id="darkToggle" class="dark-toggle" aria-label="Toggle dark mode">
+    <span class="toggle-icon" id="toggleIcon">🌙</span>
+  </button>
+
+  <!-- History Sidebar -->
+  <aside class="history-sidebar" id="historySidebar">
+    <div class="sidebar-header">
+      <h3>Analysis History</h3>
+      <button class="close-sidebar" id="closeSidebar" aria-label="Close sidebar">✕</button>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="empty-history">
+        <div class="empty-icon">🌿</div>
+        <p>No analyses yet.<br/>Upload your first plant!</p>
+      </div>
+    </div>
+    <button class="clear-history-btn" id="clearHistoryBtn">Clear All History</button>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Floating Leaves Background -->
+  <div class="leaves-bg" aria-hidden="true">
+    <div class="leaf leaf-1">🍃</div>
+    <div class="leaf leaf-2">🌿</div>
+    <div class="leaf leaf-3">🍃</div>
+    <div class="leaf leaf-4">🌱</div>
+    <div class="leaf leaf-5">🍃</div>
+    <div class="leaf leaf-6">🌿</div>
+    <div class="leaf leaf-7">🍃</div>
+    <div class="leaf leaf-8">🌱</div>
+  </div>
+
+  <!-- HERO HEADER -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="logo-wrap">
+        <div class="logo-circle">
+          <span class="logo-emoji">🌿</span>
+        </div>
+      </div>
+      <h1 class="hero-title">Plant Care <em>Assistant</em></h1>
+      <p class="hero-subtitle">Upload your plant and receive smart care suggestions instantly.</p>
+      <div class="hero-actions">
+        <button class="history-btn" id="openHistoryBtn">
+          <span>🕑</span> History
+        </button>
+      </div>
+    </div>
+    <div class="hero-wave">
+      <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="var(--bg-main)"/>
+      </svg>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- UPLOAD SECTION -->
+    <section class="upload-section" id="uploadSection">
+      <div class="section-label">Step 1 — Upload</div>
+      <h2 class="section-title">Drop your plant photo here</h2>
+
+      <div class="upload-zone" id="uploadZone" tabindex="0" role="button" aria-label="Upload plant photo">
+        <div class="upload-inner" id="uploadInner">
+          <div class="upload-icon-wrap">
+            <span class="upload-leaf-icon">🌱</span>
+          </div>
+          <p class="upload-primary">Drag & drop your plant photo</p>
+          <p class="upload-secondary">or tap to choose from gallery / camera</p>
+          <div class="upload-btns">
+            <label class="btn btn-primary" for="fileInput">
+              <span>📷</span> Choose Photo
+            </label>
+            <label class="btn btn-ghost" for="cameraInput">
+              <span>📸</span> Take Photo
+            </label>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" hidden />
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden />
+        </div>
+
+        <!-- Preview -->
+        <div class="upload-preview hidden" id="uploadPreview">
+          <img id="previewImg" src="" alt="Uploaded plant" class="preview-img" />
+          <div class="preview-overlay">
+            <button class="btn btn-primary analyze-btn" id="analyzeBtn">
+              <span class="btn-spinner hidden" id="btnSpinner"></span>
+              <span id="analyzeBtnText">✨ Analyze Plant</span>
+            </button>
+            <button class="btn btn-ghost reupload-btn" id="reuploadBtn">↩ Change Photo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANALYSIS LOADING -->
+    <section class="loading-section hidden" id="loadingSection">
+      <div class="loading-card">
+        <div class="loading-plant-spin">🌿</div>
+        <h3 class="loading-title">Analyzing your plant…</h3>
+        <div class="loading-steps" id="loadingSteps">
+          <div class="loading-step active" data-step="0">🔍 Identifying plant species</div>
+          <div class="loading-step" data-step="1">💧 Calculating water needs</div>
+          <div class="loading-step" data-step="2">☀️ Measuring light requirements</div>
+          <div class="loading-step" data-step="3">🩺 Diagnosing health status</div>
+          <div class="loading-step" data-step="4">📋 Generating care plan</div>
+        </div>
+        <div class="loading-bar-wrap">
+          <div class="loading-bar" id="loadingBar"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANALYSIS DASHBOARD -->
+    <section class="dashboard hidden" id="dashboard">
+      <div class="dashboard-header">
+        <div class="plant-identity">
+          <div class="plant-thumb-wrap">
+            <img id="dashThumb" src="" alt="Plant" class="plant-thumb" />
+            <div class="health-dot" id="healthDot"></div>
+          </div>
+          <div class="plant-identity-info">
+            <div class="ai-confidence" id="aiConfidence"></div>
+            <h2 class="plant-name" id="plantName"></h2>
+            <div class="health-badge" id="healthBadge"></div>
+          </div>
+        </div>
+        <div class="dashboard-actions">
+          <button class="icon-btn fav-btn" id="favBtn" aria-label="Favourite">🤍</button>
+          <button class="icon-btn download-btn" id="downloadBtn" aria-label="Download PDF">⬇</button>
+          <button class="icon-btn new-btn" id="newAnalysisBtn" aria-label="New analysis">🔄</button>
+        </div>
+      </div>
+
+      <!-- Possible Issues Alert -->
+      <div class="issues-alert hidden" id="issuesAlert">
+        <span class="issues-icon">⚠️</span>
+        <div class="issues-text">
+          <strong>Possible Issue Detected</strong>
+          <span id="issueDescription"></span>
+        </div>
+      </div>
+
+      <!-- Cards Grid -->
+      <div class="cards-grid" id="cardsGrid">
+
+        <!-- Watering Card -->
+        <div class="care-card card-water fade-in-card" style="--delay:0.05s">
+          <div class="card-icon-wrap water-icon">💧</div>
+          <div class="card-body">
+            <div class="card-label">Watering</div>
+            <div class="card-value" id="waterFreq"></div>
+            <div class="card-sub" id="waterSub"></div>
+            <div class="progress-wrap">
+              <div class="progress-track">
+                <div class="progress-fill water-fill" id="waterProgress"></div>
+              </div>
+              <span class="progress-label" id="waterLabel"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sunlight Card -->
+        <div class="care-card card-sun fade-in-card" style="--delay:0.1s">
+          <div class="card-icon-wrap sun-icon">☀️</div>
+          <div class="card-body">
+            <div class="card-label">Sunlight</div>
+            <div class="card-value" id="sunType"></div>
+            <div class="card-sub" id="sunSub"></div>
+            <div class="progress-wrap">
+              <div class="progress-track">
+                <div class="progress-fill sun-fill" id="sunProgress"></div>
+              </div>
+              <span class="progress-label" id="sunLabel"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Humidity Card -->
+        <div class="care-card card-humid fade-in-card" style="--delay:0.15s">
+          <div class="card-icon-wrap humid-icon">💦</div>
+          <div class="card-body">
+            <div class="card-label">Humidity</div>
+            <div class="card-value" id="humidValue"></div>
+            <div class="card-sub" id="humidSub"></div>
+            <div class="circle-progress-wrap">
+              <svg class="circle-svg" viewBox="0 0 60 60">
+                <circle class="circle-bg" cx="30" cy="30" r="24"/>
+                <circle class="circle-fg humid-circle" id="humidCircle" cx="30" cy="30" r="24"
+                  stroke-dasharray="150.8" stroke-dashoffset="150.8"/>
+              </svg>
+              <span class="circle-pct" id="humidPct"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Temperature Card -->
+        <div class="care-card card-temp fade-in-card" style="--delay:0.2s">
+          <div class="card-icon-wrap temp-icon">🌡️</div>
+          <div class="card-body">
+            <div class="card-label">Temperature</div>
+            <div class="card-value" id="tempRange"></div>
+            <div class="card-sub" id="tempSub"></div>
+          </div>
+        </div>
+
+        <!-- Fertilizer Card -->
+        <div class="care-card card-fert fade-in-card" style="--delay:0.25s">
+          <div class="card-icon-wrap fert-icon">🌱</div>
+          <div class="card-body">
+            <div class="card-label">Fertilizer</div>
+            <div class="card-value" id="fertFreq"></div>
+            <div class="card-sub" id="fertSub"></div>
+          </div>
+        </div>
+
+        <!-- Soil Card -->
+        <div class="care-card card-soil fade-in-card" style="--delay:0.3s">
+          <div class="card-icon-wrap soil-icon">🪴</div>
+          <div class="card-body">
+            <div class="card-label">Soil & Repotting</div>
+            <div class="card-value" id="soilType"></div>
+            <div class="card-sub" id="soilSub"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Care Tips -->
+      <div class="tips-section fade-in-card" style="--delay:0.35s">
+        <div class="tips-header">
+          <span class="tips-icon">💡</span>
+          <h3>Care Tips</h3>
+        </div>
+        <ul class="tips-list" id="tipsList"></ul>
+      </div>
+
+      <!-- New Analysis CTA -->
+      <div class="new-analysis-wrap fade-in-card" style="--delay:0.4s">
+        <button class="btn btn-primary btn-large" id="newAnalysisBtn2">
+          🌿 Analyze Another Plant
+        </button>
+      </div>
+
+    </section>
+
+    <!-- RECENT UPLOADS -->
+    <section class="recent-section" id="recentSection">
+      <div class="section-label">Recent</div>
+      <h2 class="section-title">Past Analyses</h2>
+      <div class="recent-grid" id="recentGrid">
+        <div class="recent-empty">
+          <span>🌱</span>
+          <p>Your plant analyses will appear here</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="app-footer">
+    <p>🌿 Plant Care Assistant · Powered by AI</p>
+  </footer>
+
+  <!-- PDF Download Notice (toast) -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
